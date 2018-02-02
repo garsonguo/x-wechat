@@ -5,7 +5,7 @@ var getRawBody = require('raw-body')
 var Wechat = require('./wechat');
 var util = require('./util')
 
-module.exports = function(opts) {
+module.exports = function(opts, handler) {
     var wechat = new Wechat(opts)
     return function*(next) {
         var that = this
@@ -37,7 +37,7 @@ module.exports = function(opts) {
 
             var content = yield util.parseXMLAsync(data)
 
-            console.log(content);
+            //console.log(content);
             /*
             { xml:
                 { ToUserName: [ 'gh_9ee12e977304' ],
@@ -53,7 +53,7 @@ module.exports = function(opts) {
             //去掉数字符号
             var message = util.formatMessage(content.xml)
 
-            console.log(message);
+            //console.log(message);
             /*
             { 
                 ToUserName: 'gh_9ee12e977304',
@@ -64,19 +64,33 @@ module.exports = function(opts) {
                 EventKey: '' 
             }
             */
-            if (message.MsgType === 'event') {
-                if (message.Event === 'subscribe') {
-                    var now = new Date().getTime();
+            // if (message.MsgType === 'event') {
+            //     if (message.Event === 'subscribe') {
+            //         var now = new Date().getTime();
 
-                    that.status = 200;
-                    that.type = 'application/xml';
-                    //注意格式   格式不对会报错
-                    var replay = `<xml><ToUserName><![CDATA[${message.FromUserName}]]></ToUserName><FromUserName><![CDATA[${message.ToUserName}]]></FromUserName><CreateTime>${now}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好]]></Content></xml>`
+            //         that.status = 200;
+            //         that.type = 'application/xml';
+            //         //注意格式   格式不对会报错
+            //         //var replay = `<xml><ToUserName><![CDATA[${message.FromUserName}]]></ToUserName><FromUserName><![CDATA[${message.ToUserName}]]></FromUserName><CreateTime>${now}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好]]></Content></xml>`
+            //         var replay = `<xml>
+            //         <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
+            //         <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
+            //         <CreateTime>${now}</CreateTime>
+            //         <MsgType><![CDATA[text]]></MsgType>
 
-                    that.body = replay
-                    return
-                }
-            }
+            //             <Content><![CDATA[你好]]></Content>
+
+            //         </xml>`
+            //         console.log(replay)
+            //         that.body = replay
+            //         return
+            //     }
+            // }
+            this.weixin = message
+
+            yield handler.call(this, next)
+
+            wechat.reply.call(this)
         }
     }
 }
