@@ -1,4 +1,8 @@
 'user strict'
+var config = require('./config')
+var Wechat = require('./wechat/wechat')
+
+var wechatApi = new Wechat(config.wechat)
 
 exports.reply = function*(next) {
     var message = this.weixin
@@ -28,6 +32,12 @@ exports.reply = function*(next) {
             reply = '11111'
         } else if (content === '2') {
             reply = '22222'
+        } else if (content === '4') {
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/1.png')
+            reply = {
+                type: 'image',
+                mediaId: data.media_id
+            }
         }
         this.body = reply
     }
