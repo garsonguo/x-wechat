@@ -38,6 +38,12 @@ exports.reply = function*(next) {
                 type: 'image',
                 mediaId: data.media_id
             }
+        } else if (content === '5') {
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/1.png', { type: 'image' })
+            reply = {
+                type: 'image',
+                mediaId: data.media_id
+            }
         }
         this.body = reply
     }
