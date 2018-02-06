@@ -57,6 +57,16 @@ exports.reply = function*(next) {
                 type: 'image',
                 mediaId: data.media_id
             }
+        } else if (content === '6') {
+            var tempQr = {
+                "expire_seconds": 604800,
+                "action_name": "QR_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_id": 123
+                    }
+                }
+            }
         }
         this.body = reply
     }

@@ -27,6 +27,13 @@ var api = {
         get: prefix + 'menu/get?',
         delete: prefix + 'menu/delete?',
         current: prefix + 'get_current_selfmenu_info?',
+    },
+    qrcode: {
+        create: prefix + 'qrcode/create?',
+        show: prefix + 'showqrcode?'
+    },
+    shortUrl: {
+        create: prefix + 'shorturl?'
     }
 };
 
@@ -379,6 +386,57 @@ Wechat.prototype.getCurrentMenu = function(menu) {
                         resolve(_data)
                     } else {
                         throw new Error('获取自定义菜单配置失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
+
+};
+//创建二维码
+Wechat.prototype.createQrcode = function(qr) {
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var url = api.qrcode.create + 'access_token=' + data.access_token;
+                request({ method: 'POST', url: url, body: qr, json: true }).then(function(response) {
+                    var _data = response['body']
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('创建二维码失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
+
+};
+//获取二维码
+Wechat.prototype.showQrcode = function(ticket) {
+    return api.qrcode.show + 'ticket=' + encodeURL(ticket);
+};
+//长连接转短连接
+Wechat.prototype.createShortUrl = function(action, url) {
+    action = action || 'long2short'
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var url = api.qrcode.create + 'access_token=' + data.access_token;
+                var form = {
+                    action: action,
+                    long_url: url
+                }
+                request({ method: 'POST', url: url, body: form, json: true }).then(function(response) {
+                    var _data = response['body']
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('创建二维码失败')
                     }
                 }).catch(function(error) {
                     reject(error)
