@@ -21,6 +21,12 @@ var api = {
         update: prefix + 'material/update_news?',
         count: prefix + 'material/get_materialcount?',
         batch: prefix + 'material/batchget_material?'
+    },
+    menu: {
+        create: prefix + 'menu/create?',
+        get: prefix + 'menu/get?',
+        delete: prefix + 'menu/delete?',
+        current: prefix + 'get_current_selfmenu_info?',
     }
 };
 
@@ -34,19 +40,14 @@ function Wechat(opts) {
 
     this.fetAccessToken()
 }
-Wechat.prototype.fetAccessToken = function(data) {
+Wechat.prototype.fetAccessToken = function() {
     var that = this
-    if (this.access_token && this.expires_in) {
-        if (this.isValidAccessToken(this)) {
-            return Promise.resolve(this)
-        }
-    }
-    this.getAccessToken()
+    return this.getAccessToken()
         .then(function(data) {
             try {
                 data = JSON.parse(data)
             } catch (e) {
-                return that.updateAccessToken(data)
+                return that.updateAccessToken()
             }
 
             if (that.isValidAccessToken(data)) {
@@ -54,13 +55,10 @@ Wechat.prototype.fetAccessToken = function(data) {
             } else {
                 return that.updateAccessToken()
             }
-        }).then(function(data) {
-            that.access_token = data.access_token
-            that.expires_in = data.expires_in
-
+        })
+        .then(function(data) {
             that.saveAccessToken(data)
-
-            return new Promise.resolve(data)
+            return Promise.resolve(data)
         })
 
 }
@@ -299,8 +297,96 @@ Wechat.prototype.batchMaterial = function(options) {
             });
     })
 
-}
+};
+//创建菜单
+Wechat.prototype.createMenu = function(menu) {
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var url = api.menu.create + 'access_token=' + data.access_token
+                console.log(url)
+                request({ method: 'POST', url: url, body: menu, json: true }).then(function(response) {
+                    var _data = response['body']
+                    console.log(response)
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('创建菜单失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
 
+};
+//获取菜单
+Wechat.prototype.getMenu = function() {
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var url = api.menu.get + 'access_token=' + data.access_token;
+                request({ url: url, json: true }).then(function(response) {
+                    var _data = response[1]
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('获取菜单失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
+
+};
+//删除菜单
+Wechat.prototype.deleteMenu = function() {
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var access_token = data.access_token
+                var url = api.menu.delete + 'access_token=' + access_token
+                console.log("url:" + url)
+                request({ url: url, json: true }).then(function(response) {
+                    var _data = response['body']
+                    console.log(_data)
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('删除菜单菜单失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
+
+};
+//获取自定义菜单配置
+Wechat.prototype.getCurrentMenu = function(menu) {
+    var that = this
+    return new Promise(function(resolve, reject) {
+        that.fetAccessToken()
+            .then(function(data) {
+                var url = api.menu.current + 'access_token=' + data.access_token;
+                request({ url: url, json: true }).then(function(response) {
+                    var _data = response[1]
+                    if (_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error('获取自定义菜单配置失败')
+                    }
+                }).catch(function(error) {
+                    reject(error)
+                })
+            });
+    })
+
+};
 Wechat.prototype.reply = function() {
     var content = this.body
     var message = this.weixin

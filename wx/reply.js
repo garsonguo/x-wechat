@@ -1,9 +1,14 @@
 'user strict'
-var config = require('./config')
-var Wechat = require('./wechat/wechat')
-
+var config = require('../config')
+var Wechat = require('../wechat/wechat')
+var menu = require('./menu')
 var wechatApi = new Wechat(config.wechat)
-
+wechatApi.deleteMenu().then(function() {
+    console.log(111)
+    return wechatApi.createMenu(menu)
+}).then(function(msg) {
+    console.log(msg)
+})
 exports.reply = function*(next) {
     var message = this.weixin
     console.log(message)
@@ -24,6 +29,14 @@ exports.reply = function*(next) {
             this.body = '扫描二维码：' + message.EventKey + ' ' + message.Ticket
         } else if (message.Event === 'VIEW') {
             this.body = '你点击了菜单的链接：' + message.EventKey
+        } else if (message.Event === 'scancode_push') {
+            this.body = '扫码事件:' + message.EventKey
+        } else if (message.Event === 'scancode_waitmsg') {
+            this.body = '扫码推送中:' + message.EventKey
+        } else if (message.Event === 'pic_sysphoto') {
+            this.body = '弹出系统拍照:' + message.EventKey
+        } else if (message.Event === 'pic_photo_or_album') {
+            this.body = '弹出拍照或相机:' + message.EventKey
         }
     } else if (message.MsgType === 'text') {
         var content = message.Content
@@ -33,13 +46,13 @@ exports.reply = function*(next) {
         } else if (content === '2') {
             reply = '22222'
         } else if (content === '4') {
-            var data = yield wechatApi.uploadMaterial('image', __dirname + '/1.png')
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '../1.png')
             reply = {
                 type: 'image',
                 mediaId: data.media_id
             }
         } else if (content === '5') {
-            var data = yield wechatApi.uploadMaterial('image', __dirname + '/1.png', { type: 'image' })
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '../1.png', { type: 'image' })
             reply = {
                 type: 'image',
                 mediaId: data.media_id
