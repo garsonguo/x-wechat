@@ -34,6 +34,9 @@ var api = {
     },
     shortUrl: {
         create: prefix + 'shorturl?'
+    },
+    ticket: {
+        get: prefix + 'ticket/getticket?'
     }
 };
 
@@ -44,7 +47,8 @@ function Wechat(opts) {
     this.appsecret = opts.appsecret
     this.getAccessToken = opts.getAccessToken
     this.saveAccessToken = opts.saveAccessToken
-
+    this.getTicket = opts.getTicket
+    this.saveTicket = opts.saveTicket
     this.fetAccessToken()
 }
 Wechat.prototype.fetAccessToken = function() {
@@ -68,6 +72,60 @@ Wechat.prototype.fetAccessToken = function() {
             return Promise.resolve(data)
         })
 
+}
+Wechat.prototype.fetchTicket = function(access_token) {
+    var that = this
+    return this.getTicket()
+        .then(function(data) {
+            try {
+                data = JSON.parse(data)
+            } catch (e) {
+                return that.updateTicket(access_token)
+            }
+
+            if (that.isValidTicket(data)) {
+                return Promise.resolve(data)
+            } else {
+                return that.updateTicket(access_token)
+            }
+        })
+        .then(function(data) {
+            that.saveTicket(data)
+            return Promise.resolve(data)
+        })
+
+}
+Wechat.prototype.updateTicket = function(access_token) {
+    var appID = this.appID;
+    var appsecret = this.appsecret;
+    var url = api.ticket.get + '&access_token=' + access_token + '&type=jsapi';
+
+    return new Promise(function(resolve, reject) {
+        request({ url: url, json: true }).then(function(response) {
+            var data = response['body']
+            var now = (new Date().getTime())
+            var expires_in = now + (data.expires_in - 20) * 1000
+
+            data.expires_in = expires_in
+
+            resolve(data)
+        })
+    })
+
+}
+Wechat.prototype.isValidTicket = function(data) {
+    if (!data || !data.ticket || !data.expires_in) {
+        return false
+    }
+    var ticket = data.ticket
+    var expires_in = data.expires_in
+    var now = (new Date().getTime())
+
+    if (ticket && now < expires_in) {
+        return true
+    } else {
+        return false
+    }
 }
 Wechat.prototype.isValidAccessToken = function(data) {
     if (!data || !data.access_token || !data.expires_in) {
@@ -312,10 +370,10 @@ Wechat.prototype.createMenu = function(menu) {
         that.fetAccessToken()
             .then(function(data) {
                 var url = api.menu.create + 'access_token=' + data.access_token
-                console.log(url)
+                    // console.log(url)
                 request({ method: 'POST', url: url, body: menu, json: true }).then(function(response) {
                     var _data = response['body']
-                    console.log(response)
+                        // console.log(response)
                     if (_data) {
                         resolve(_data)
                     } else {
@@ -357,7 +415,7 @@ Wechat.prototype.deleteMenu = function() {
             .then(function(data) {
                 var access_token = data.access_token
                 var url = api.menu.delete + 'access_token=' + access_token
-                console.log("url:" + url)
+                    // console.log("url:" + url)
                 request({ url: url, json: true }).then(function(response) {
                     var _data = response['body']
                     console.log(_data)
