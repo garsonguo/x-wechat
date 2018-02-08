@@ -212,8 +212,6 @@ Wechat.prototype.uploadMaterial = function(type, filePath, permanent) {
                 request({ method: 'POST', url: url, formData: form, json: true }).then(function(response) {
                     var _data = response['body']
                     if (_data) {
-                        console.log(_data)
-                        console.log('上传成功')
                         resolve(_data)
                     } else {
                         throw new Error('上传失败')
@@ -268,8 +266,6 @@ Wechat.prototype.deleteMaterial = function(mediaId) {
                 request({ method: 'POST', url: url, body: form, json: true }).then(function(response) {
                     var _data = response['body']
                     if (_data) {
-                        console.log(_data)
-                        console.log('上传成功')
                         resolve(_data)
                     } else {
                         throw new Error('上传失败')
@@ -299,8 +295,6 @@ Wechat.prototype.updateMaterial = function(mediaId, news) {
                 request({ method: 'POST', url: url, body: form, json: true }).then(function(response) {
                     var _data = response['body']
                     if (_data) {
-                        console.log(_data)
-                        console.log('上传成功')
                         resolve(_data)
                     } else {
                         throw new Error('上传失败')
@@ -373,7 +367,6 @@ Wechat.prototype.createMenu = function(menu) {
                     // console.log(url)
                 request({ method: 'POST', url: url, body: menu, json: true }).then(function(response) {
                     var _data = response['body']
-                        // console.log(response)
                     if (_data) {
                         resolve(_data)
                     } else {
@@ -415,7 +408,6 @@ Wechat.prototype.deleteMenu = function() {
             .then(function(data) {
                 var access_token = data.access_token
                 var url = api.menu.delete + 'access_token=' + access_token
-                    // console.log("url:" + url)
                 request({ url: url, json: true }).then(function(response) {
                     var _data = response['body']
                     console.log(_data)
@@ -508,7 +500,6 @@ Wechat.prototype.reply = function() {
     var message = this.weixin
 
     var xml = util.tpl(content, message)
-        // console.log(xml)
     this.status = 200
     this.type = 'application/xml'
     this.body = xml

@@ -6,6 +6,7 @@ var Wechat = require('./wechat');
 var util = require('./util')
 
 module.exports = function(opts, handler) {
+
     var wechat = new Wechat(opts)
     return function*(next) {
         var that = this
