@@ -10,6 +10,7 @@ module.exports = function(opts, handler) {
     return function*(next) {
         var that = this
         var token = opts.token;
+
         var signature = this.query.signature
         var nonce = this.query.nonce
         var timestamp = this.query.timestamp

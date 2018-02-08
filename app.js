@@ -68,6 +68,7 @@ function sign(ticket, url) {
     var noncestr = createNonce()
     var timestamp = createTimestamp()
     var signature = _sign(noncestr, ticket, timestamp, url)
+
     return {
         noncestr: noncestr,
         timestamp: timestamp,
@@ -83,10 +84,8 @@ app.use(function*(next) {
 
         var ticketData = yield wechatApi.fetchTicket(access_token)
         var ticket = ticketData.ticket
-        var url = this.url
+        var url = "http://xiaobog.vicp.io:37001" + this.url
         var params = sign(ticket, url)
-
-        console.log(params)
 
         this.body = ejs.render(tpl, params)
 
